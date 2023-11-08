@@ -7,6 +7,7 @@ const Home = () => {
 
     let [movies, setMovies] = useState([]);
     let [search,setSearch]=useState('');
+    let [searchResult,setSearchResult] = useState([]);
 
     let getMovies = async () => {
         let resp = await axios.get('https://strategyco-backend.onrender.com/allMovies');
@@ -25,22 +26,25 @@ const Home = () => {
           }, delay);
         };
       };
+      
     
 
     let debounced = debounce(async (value)=>{
        try {
+        console.log('Debounced value:', value); 
         let resp = await axios.get(`https://strategyco-backend.onrender.com/search?query=${value}`);
         let data=resp.data.msg.results;
-        console.log(data);
-        setMovies(data);
+        console.log('Debounced search result:', data); 
+
+        setSearchResult(data);
        } catch (error) {
         console.log('error:',error);
        }
-    },1000)
+    },2000)
 
     let handleSearch=async (e)=>{
         let value=e.target.value;
-        // console.log(data);
+        console.log('Input value:', value); 
         setSearch(value);
         debounced(value);  
     }
@@ -54,13 +58,15 @@ const Home = () => {
             <Box w={'100vw'} height={'120px'} bg={'rgb(247,184,1)'} position={'fixed'} p={'10px'} textAlign={'center'}>
                <Heading color={'purple'}>Movie App</Heading>
                <Input type='text' placeholder='Search' width={'500px'} mt={'10px'} variant='flushed'
-               onChange={handleSearch}/>
+               onChange={(e)=>{handleSearch(e)}}/>
             </Box>
 
         <Box p={'20px'}>
             <SimpleGrid columns={3} gap={'15px'} mt={'120px'}>
                 {
-                    movies?.map((e, i) => {
+                    searchResult.length>0 ? searchResult.map((e, i) => {
+                        return <CardDiv e={e} key={i} />
+                    })  : movies.map((e, i) => {
                         return <CardDiv e={e} key={i} />
                     })
                 }
